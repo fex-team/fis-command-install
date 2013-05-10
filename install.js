@@ -7,7 +7,7 @@
 
 exports.name = 'install';
 exports.usage = '<name> [options]';
-exports.desc = 'install components from remote repository';
+exports.desc = 'install components or demos';
 exports.register = function(commander){
     var defaultRepos = fis.config.get(
         'system.repos',
