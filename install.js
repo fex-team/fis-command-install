@@ -7,7 +7,7 @@
 
 exports.name = 'install';
 exports.usage = '<name> [options]';
-exports.desc = 'install components or demos';
+exports.desc = 'install components and demos';
 exports.register = function(commander){
     
     commander
