@@ -94,7 +94,6 @@ exports.register = function(commander) {
                     }
                 })
 
-                // finally get components list.
                 .then(function() {
                     var components = settings.components || [];
 
@@ -120,6 +119,7 @@ exports.register = function(commander) {
                         });
                 })
 
+                // finally get components list.
                 .then(function(components) {
                     if (!components.length) {
                         logger.warn('Installed nothing!');
