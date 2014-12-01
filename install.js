@@ -114,7 +114,6 @@ exports.register = function(commander) {
                         return;
                     }
 
-                    debugger;
                     var collector = require('./lib/collector.js');
                     return collector(components);
                 })
@@ -131,10 +130,44 @@ exports.register = function(commander) {
                         return;
                     }
 
+                    var ProgressBar = require('progress');
+                    var percentages = {};
+                    var bar, ticked;
+                    var update = function(name, loaded, total) {
+                        percentages[name] = percentages[name] || {};
+                        percentages[name].loaded = loaded;
+                        percentages[name].total = total;
+                        updateAll();
+                    };
+                    var updateAll = function() {
+                        bar = bar || new ProgressBar(' download [:bar] :percent :etas', {
+                            incomplete: ' ',
+                            total: 100,
+                            clear: true
+                        });
+
+                        var total = 0;
+                        var loaded = 0;
+
+                        Object.keys(percentages).forEach(function(key) {
+                            var item = percentages[key];
+
+                            total += item.total;
+                            loaded += item.loaded;
+                        });
+
+                        var percentage = Math.round(loaded * 100 / total);
+                        var intervel = percentage - ticked;
+                        ticked = percentage;
+                        bar.tick(Math.max(intervel, 0));
+                    }
+
                     return Promise
 
                         .all(components.map(function(component) {
-                            return component.install();
+                            return component.install(function(percent, loaded, total) {
+                                update(component.name, loaded, total);
+                            });
                         }))
 
                         .then(function(components) {

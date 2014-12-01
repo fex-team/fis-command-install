@@ -22,6 +22,8 @@
     "bluebird": "^2.3.11",
     "findup": "^0.1.5",
     "fis-scaffold-kernel": "~0.0.6",
+    "progress": "^1.1.8",
+    "progress-bar": "^0.1.1",
     "request": "^2.48.0",
     "semver": "^4.1.0"
   },
