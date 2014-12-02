@@ -242,11 +242,11 @@ exports.register = function(commander) {
                 })
 
                 // error handle
-                // .catch(function(e) {
-                //     if (e.message === 'Not Found') {
-                //         logger.warn('`fis install` now is for installing commponents, you may use `\x1b[31mlights install\x1b[0m` instead.');
-                //     }
-                //     logger.error('\x1b[31m%s\x1b[0m', e.message);
-                // });
+                .catch(function(e) {
+                    if (e.message === 'Not Found') {
+                        logger.warn('`fis install` now is for installing commponents, you may use `\x1b[31mlights install\x1b[0m` instead.');
+                    }
+                    logger.error('\x1b[31m%s\x1b[0m', e.message);
+                });
         });
 };
