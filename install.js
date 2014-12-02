@@ -227,7 +227,7 @@ exports.register = function(commander) {
 
                                     var last = components.length - 1;
                                     var arrs = components.map(function(item, index) {
-                                        return (index === last ? '└── ' : '├── ') + item.address + '@' + item.version;
+                                        return (index === last ? '└── ' : '├── ') + item.type + ':' + item.address + '@' + item.version;
                                     });
 
                                     console.log('Installed\n%s', arrs.join('\n'));
@@ -243,7 +243,7 @@ exports.register = function(commander) {
 
                 // error handle
                 .catch(function(e) {
-                    if (e.message === 'Not Found') {
+                    if (/Not\s+Found/i.test(e.message)) {
                         logger.warn('`fis install` now is for installing commponents, you may use `\x1b[31mlights install\x1b[0m` instead.');
                     }
                     logger.error('\x1b[31m%s\x1b[0m', e.message);
