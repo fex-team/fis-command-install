@@ -69,27 +69,42 @@ exports.register = function(commander) {
                         settings.componentsDir = path.join(settings.root,
                                 fis.config.get('component.dir') || '/components');
 
-                        settings.defaultRepos = fis.config.get('component.default', 'github');
+                        settings.protocol = fis.config.get('component.protocol', 'github');
                         settings.github = fis.config.get('component.github', {});
                         settings.gitlab = fis.config.get('component.gitlab', {});
                         settings.lights = fis.config.get('component.lights', {});
                     }
                 })
 
-                // Check components.json if did not sepecified any components from command line.
-                // 如果没有指定参数，将通过 components.json 来决定安装什么组件。
+                // 读取 components.json 如果存在
                 .then(function() {
                     var components = settings.components;
+                    var path = require('path');
+                    var exists = require('fs').existsSync;
+                    var componentJson = path.join(settings.root, 'component.json');
 
-                    if (!components.length) {
+                    if (!components.length && !exists(componentJson)) {
+                        throw new Error('missing `component.json`');
+                    }
+
+                    if (exists(componentJson)) {
                         var config = Promise.promisify(require('./lib/config'));
-                        var path = require('path');
 
-                        return config(path.join(settings.root, 'component.json'))
+                        return config(componentJson)
 
                             .then(function(ret) {
+                                var _ = require('./lib/util.js');
+
                                 settings.config = ret;
-                                settings.components = ret.dependencies;
+
+                                []
+                                    .join
+                                    .apply(settings.components, ret.dependencies || []);
+
+                                ret.protocol && (settings.protocol = ret.protocol);
+                                ret.github && _.mixin(settings.github, ret.github);
+                                ret.gitlab && _.mixin(settings.gitlab, ret.gitlab);
+                                ret.lights && _.mixin(settings.lights, ret.lights);
                             });
                     }
                 })
@@ -157,10 +172,19 @@ exports.register = function(commander) {
 
                             var ProgressBar = require('progress');
                             var percentages = {};
+
+                            // 优化进度提示。
+                            components.forEach(function(item) {
+                                percentages[item.name] = {
+                                    loaded: 0,
+                                    total: 1024 * 1024 // 假的，后面会动态调整。
+                                };
+                            });
+
                             var bar;
                             var ticked = 0;
                             var update = function(name, loaded, total) {
-                                percentages[name] = percentages[name] || {};
+                                // percentages[name] = percentages[name] || {};
                                 percentages[name].loaded = loaded;
                                 percentages[name].total = total;
                                 updateAll();
@@ -218,8 +242,11 @@ exports.register = function(commander) {
                 })
 
                 // error handle
-                .catch(function(e) {
-                    logger.error('\x1b[31m%s\x1b[0m', e.message);
-                });
+                // .catch(function(e) {
+                //     if (e.message === 'Not Found') {
+                //         logger.warn('`fis install` now is for installing commponents, you may use `\x1b[31mlights install\x1b[0m` instead.');
+                //     }
+                //     logger.error('\x1b[31m%s\x1b[0m', e.message);
+                // });
         });
 };
