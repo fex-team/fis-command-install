@@ -10,6 +10,13 @@ exports.usage = '[options] <components...>';
 exports.desc = 'install components';
 
 var logger = require('./lib/logger');
+var factory = require('./lib/remotes/factory.js');
+var _ = require('./lib/util.js');
+var fs = require('fs');
+var path = require('path');
+var exists = fs.existsSync;
+var write = fs.writeFileSync;
+
 exports.register = function(commander) {
 
     commander
@@ -58,8 +65,6 @@ exports.register = function(commander) {
                 // load fis-conf.js if exists.
                 // 读取用户配置信息。
                 .then(function() {
-                    var path = require('path');
-                    var exists = require('fs').existsSync;
                     var filepath =  path.join(settings.root, 'fis-conf.js');
 
                     if (exists(filepath)) {
@@ -93,8 +98,6 @@ exports.register = function(commander) {
                         return config(componentJson)
 
                             .then(function(ret) {
-                                var _ = require('./lib/util.js');
-
                                 settings.config = ret;
 
                                 []
@@ -112,26 +115,11 @@ exports.register = function(commander) {
                 .then(function() {
                     var components = settings.components || [];
 
-                    var factory = require('./lib/remotes/factory.js');
-
                     factory.setSettings(settings);
 
                     // validate and filter invalid dependencies.
                     // 过滤掉不能识别的依赖。
-                    return components
-                        .map(function(component) {
-                            var type = factory.detect(component);
-
-                            if (!type) {
-                                logger.warn('`%s` is not a valid repository.', component);
-                                return null;
-                            }
-
-                            return factory(component);
-                        })
-                        .filter(function(item) {
-                            return item != null;
-                        });
+                    return strToRemote(components);
                 })
 
                 // finally get components list.
@@ -145,7 +133,6 @@ exports.register = function(commander) {
                     return collector(components)
 
                         .then(function(components) {
-                            var _ = require('./lib/util.js');
 
                             // 过滤掉本地的仓库。已经同名的包。
                             components = components
@@ -231,14 +218,35 @@ exports.register = function(commander) {
                                     });
 
                                     console.log('Installed\n%s', arrs.join('\n'));
+                                    return components;
                                 });
                         });
                 })
 
                 // 保存 components.json
-                .then(function() {
-                    // todo
+                .then(function(installed) {
                     // 如果指定了  --save， 则需要把数据写入到 components.josn 文件里面。
+                    if (settings.save && args.length && installed && installed.length) {
+                        var config = settings.config;
+                        var specified = strToRemote(args.concat());
+
+                        config.dependencies = config.dependencies || [];
+
+                        var oldList = strToRemote(config.dependencies);
+                        specified.forEach(function(item) {
+                            var idx;
+
+                            if (!~_.indexOfArray('name', item.name, oldList) && ~(idx = _.indexOfArray('name', item.name, installed))) {
+
+                                var found = installed[idx];
+
+                                config.dependencies.push(found.type + ':' + found.address + '@' + found.version);
+                            }
+                        });
+
+                        var componentJson = path.join(settings.root, 'component.json');
+                        write(componentJson, JSON.stringify(config, null, 2));
+                    }
                 })
 
                 // error handle
@@ -250,3 +258,21 @@ exports.register = function(commander) {
                 });
         });
 };
+
+function strToRemote(components, ignoreInvalid) {
+    return components
+
+        .map(function(component) {
+            var type = factory.detect(component);
+
+            if (!type) {
+                ignoreInvalid || logger.warn('`%s` is not a valid repository.', component);
+                return null;
+            }
+
+            return factory(component);
+        })
+        .filter(function(item) {
+            return item != null;
+        });
+}
