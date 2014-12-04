@@ -69,16 +69,15 @@ exports.register = function(commander) {
 
                     if (exists(filepath)) {
                         require(filepath);
-
-                        // 应用  fis-conf.js
-                        settings.componentsDir = path.join(settings.root,
-                                fis.config.get('component.dir') || '/components');
-
-                        settings.protocol = fis.config.get('component.protocol', 'github');
-                        settings.github = fis.config.get('component.github', {});
-                        settings.gitlab = fis.config.get('component.gitlab', {});
-                        settings.lights = fis.config.get('component.lights', {});
                     }
+
+                    // 应用  fis-conf.js
+                    settings.componentsDir = path.join(settings.root,
+                            fis.config.get('component.dir') || '/components');
+                    settings.protocol = fis.config.get('component.protocol', 'github');
+                    settings.github = fis.config.get('component.github', {});
+                    settings.gitlab = fis.config.get('component.gitlab', {});
+                    settings.lights = fis.config.get('component.lights', {});
                 })
 
                 // 读取 components.json 如果存在
