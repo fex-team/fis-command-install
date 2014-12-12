@@ -159,11 +159,36 @@ exports.register = function(commander) {
                             return Promise
 
                                 .reduce(components, function(collection, component) {
+                                    var SimpleTick = require('./lib/tick.js');
+                                    var ProgressBar = require('progress');
+
+                                    var bar;
+                                    var progress = function(percent, loaded, total) {
+                                        if (false && total) {
+                                            bar = bar || new ProgressBar('downloading `' + component.address + '` [:bar] :percent :etas', {
+                                                complete: '=',
+                                                incomplete: ' ',
+                                                width: 20,
+                                                total: total,
+                                                clear: true
+                                            });
+
+                                            bar.update(percent);
+                                        } else {
+
+                                            bar = bar || new SimpleTick('doloading `' + component.address + '` ');
+                                            bar.tick();
+                                        }
+                                    };
+
                                     return component
 
-                                        .install()
+                                        .install(progress)
 
                                         .then(function(component) {
+                                            if (bar instanceof SimpleTick) {
+                                                bar.clear();
+                                            }
                                             collection.push(component);
                                             return collection;
                                         })
