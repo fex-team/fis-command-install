@@ -100,7 +100,7 @@ exports.register = function(commander) {
                                 settings.config = ret;
 
                                 []
-                                    .join
+                                    .push
                                     .apply(settings.components, ret.dependencies || []);
 
                                 ret.protocol && (settings.protocol = ret.protocol);
