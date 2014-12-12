@@ -156,60 +156,20 @@ exports.register = function(commander) {
                                 return;
                             }
 
-                            var ProgressBar = require('progress');
-                            var percentages = {};
-
-                            // 优化进度提示。
-                            components.forEach(function(item) {
-                                percentages[item.name] = {
-                                    loaded: 0,
-                                    total: 1024 * 1024 // 假的，后面会动态调整。
-                                };
-                            });
-
-                            var bar;
-                            var ticked = 0;
-                            var update = function(name, loaded, total) {
-                                // percentages[name] = percentages[name] || {};
-                                percentages[name].loaded = loaded;
-                                percentages[name].total = total;
-                                updateAll();
-                            };
-                            var updateAll = function() {
-                                bar = bar || new ProgressBar(' downloading [:bar] :percent :etas', {
-                                    incomplete: ' ',
-                                    total: 100,
-                                    clear: true
-                                });
-
-                                var total = 0;
-                                var loaded = 0;
-
-                                Object.keys(percentages).forEach(function(key) {
-                                    var item = percentages[key];
-
-                                    total += item.total;
-                                    loaded += item.loaded;
-                                });
-
-                                var percentage = Math.round(loaded * 100 / total);
-                                var step = Math.max(percentage - ticked, 0);
-                                ticked += step;
-                                bar.tick(step);
-                            }
-
                             return Promise
 
-                                .all(components.map(function(component) {
-                                    return component.install(function(percent, loaded, total) {
-                                        update(component.name, loaded, total);
-                                    });
-                                }))
+                                .reduce(components, function(collection, component) {
+                                    return component
+
+                                        .install()
+
+                                        .then(function(component) {
+                                            collection.push(component);
+                                            return collection;
+                                        })
+                                }, [])
 
                                 .then(function(components) {
-
-                                    // 如果没有 tick 完，则收下尾
-                                    (100 - ticked) && bar && bar.tick(100 - ticked);
 
                                     var last = components.length - 1;
                                     var arrs = components.map(function(item, index) {
