@@ -134,7 +134,7 @@ exports.register = function(commander) {
                         .try(function() {
                             var collector = require('./lib/collector.js');
                             var SimpleTick = require('./lib/tick.js');
-                            var bar = new  SimpleTick('analyzing dependencies ');
+                            var bar = new  SimpleTick('analyzing dependencies ', {keepAlive: true});
 
                             return collector(components)
 
