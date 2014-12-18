@@ -128,8 +128,21 @@ exports.register = function(commander) {
                         return;
                     }
 
-                    var collector = require('./lib/collector.js');
-                    return collector(components)
+
+                    return Promise
+
+                        .try(function() {
+                            var collector = require('./lib/collector.js');
+                            var SimpleTick = require('./lib/tick.js');
+                            var bar = new  SimpleTick('analyzing dependencies ');
+
+                            return collector(components)
+
+                                .then(function(components) {
+                                    bar.clear();
+                                    return components;
+                                });
+                        })
 
                         .then(function(components) {
 
@@ -164,7 +177,7 @@ exports.register = function(commander) {
 
                                     var bar;
                                     var progress = function(percent, loaded, total) {
-                                        if (false && total) {
+                                        if (total) {
                                             bar = bar || new ProgressBar('downloading `' + component.address + '` [:bar] :percent :etas', {
                                                 complete: '=',
                                                 incomplete: ' ',
