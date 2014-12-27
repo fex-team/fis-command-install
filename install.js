@@ -189,7 +189,7 @@ exports.register = function(commander) {
                                             bar.update(percent);
                                         } else {
 
-                                            bar = bar || new SimpleTick('doloading `' + component.address + '` ');
+                                            bar = bar || new SimpleTick('downloading `' + component.address + '` ');
                                             bar.tick();
                                         }
                                     };
