@@ -65,7 +65,7 @@ exports.register = function(commander) {
                 // load fis-conf.js if exists.
                 // 读取用户配置信息。
                 .then(function() {
-                    var filepath =  path.join(settings.root, 'fis-conf.js');
+                    var filepath =  path.resolve(settings.root, 'fis-conf.js');
 
                     if (exists(filepath)) {
                         require(filepath);
