@@ -16,6 +16,7 @@ var fs = require('fs');
 var path = require('path');
 var exists = fs.existsSync;
 var write = fs.writeFileSync;
+var Promise = require('bluebird');
 
 exports.register = function(commander) {
 
@@ -25,7 +26,7 @@ exports.register = function(commander) {
         .action(function() {
             var args = [].slice.call(arguments);
             var options = args.pop();
-            var Promise = require('bluebird');
+
             var settings = {
                 save: !!options.save,
                 root: options.root || '',
