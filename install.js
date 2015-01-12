@@ -76,7 +76,9 @@ exports.register = function(commander) {
                     settings.componentsDir = path.join(settings.root,
                             fis.config.get('component.dir') || '/components');
                     settings.protocol = fis.config.get('component.protocol', 'github');
-                    settings.github = fis.config.get('component.github', {});
+                    settings.github = fis.config.get('component.github', {
+                        author: "fis-components"
+                    });
                     settings.gitlab = fis.config.get('component.gitlab', {});
                     settings.lights = fis.config.get('component.lights', {});
                 })
