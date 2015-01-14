@@ -83,6 +83,31 @@ exports.register = function(commander) {
                     settings.lights = fis.config.get('component.lights', {});
                 })
 
+                .then(function() {
+                    var roadmap = fis.config.get('roadmap.path', []);
+                    var good = false;
+                    var folder = path.basename(fis.config.get('component.dir') || '/components');
+
+                    roadmap.every(function(item) {
+                        var reg = item.reg.toString();
+
+                        if (~reg.indexOf(folder) && item.isMod) {
+                            good = true;
+                            return false;
+                        }
+                        return true;
+                    });
+
+                    good || logger.warn('Please copy the following rule to you `roadmap.path`\n settings in `fos-conf.js`:\n' +
+                            '{\n'+
+                            '    reg: /^\\/'+folder+'\\/.*\\.js$/i,\n' +
+                            '    jswrapper: {\n' +
+                            '        type: \'amd\'\n' +
+                            '    }\n' +
+                            '}\n'
+                        );
+                })
+
                 // 读取 components.json 如果存在
                 .then(function() {
                     var components = settings.components;
