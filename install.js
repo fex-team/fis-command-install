@@ -88,6 +88,10 @@ exports.register = function(commander) {
                     var good = false;
                     var folder = path.basename(fis.config.get('component.dir') || '/components');
 
+                    if (fis.config.get('component.skipRoadmapCheck', false)) {
+                        return;
+                    }
+
                     roadmap.every(function(item) {
                         var reg = item.reg.toString();
 
@@ -98,9 +102,10 @@ exports.register = function(commander) {
                         return true;
                     });
 
-                    good || logger.warn('Please copy the following rule to you `roadmap.path`\n settings in `fos-conf.js`:\n' +
+                    good || logger.warn('Please copy the following rule to you `roadmap.path`\n settings in `fis-conf.js`:\n' +
                             '{\n'+
                             '    reg: /^\\/'+folder+'\\/.*\\.js$/i,\n' +
+                            '    isMod: true,\n' +
                             '    jswrapper: {\n' +
                             '        type: \'amd\'\n' +
                             '    }\n' +
