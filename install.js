@@ -198,7 +198,7 @@ exports.register = function(commander) {
                                 });
 
                             if (!components.length) {
-                                console.log('Aready installed');
+                                console.log('Already installed');
                                 return;
                             }
 
