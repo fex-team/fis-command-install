@@ -1,7 +1,7 @@
 {
   "name": "fis-command-install",
   "description": "fis install command.",
-  "version": "0.1.17",
+  "version": "0.1.18",
   "author": "FIS Team <fis@baidu.com>",
   "homepage": "http://fis.baidu.com/",
   "keywords": [
