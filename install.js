@@ -210,7 +210,7 @@ exports.register = function(commander) {
 
                                     var bar;
                                     var progress = function(percent, loaded, total) {
-                                        if (total) {
+                                        if (total && process.stderr.isTTY) {
                                             bar = bar || new ProgressBar('downloading `' + component.address + '` [:bar] :percent :etas', {
                                                 complete: '=',
                                                 incomplete: ' ',
