@@ -21,7 +21,7 @@ var Promise = require('bluebird');
 exports.register = function(commander) {
 
     commander
-        .option('--save', 'save component(s) dependencies into `components.json` file.')
+        .option('--save', 'save component(s) dependencies into `component.json` file.')
         .option('-r, --root <path>', 'set project root')
         .action(function() {
             var args = [].slice.call(arguments);
@@ -257,7 +257,7 @@ exports.register = function(commander) {
                 .then(function(installed) {
                     // 如果指定了  --save， 则需要把数据写入到 components.josn 文件里面。
                     if (settings.save && args.length && installed && installed.length) {
-                        var config = settings.config;
+                        var config = settings.config || {};
                         var specified = strToRemote(args.concat());
 
                         config.dependencies = config.dependencies || [];
