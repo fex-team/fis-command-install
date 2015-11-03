@@ -136,6 +136,10 @@ exports.register = function(commander) {
                                     .push
                                     .apply(settings.components, ret.dependencies || []);
 
+                                []
+                                    .push
+                                    .apply(settings.components, ret.devDependencies || []);
+
                                 ret.protocol && (settings.protocol = ret.protocol);
                                 ret.github && _.mixin(settings.github, ret.github);
                                 ret.gitlab && _.mixin(settings.gitlab, ret.gitlab);
