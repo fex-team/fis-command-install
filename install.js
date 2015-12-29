@@ -69,7 +69,11 @@ exports.register = function(commander) {
                     var filepath =  path.resolve(settings.root, 'fis-conf.js');
 
                     if (exists(filepath)) {
-                        require(filepath);
+                        try {
+                          require(filepath);
+                        } catch(e) {
+                          // fis.log.warning('Load fis-conf.js failure with message ' + e.message);
+                        }
                     }
 
                     // 应用  fis-conf.js
