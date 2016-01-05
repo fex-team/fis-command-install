@@ -17,6 +17,7 @@ var path = require('path');
 var exists = fs.existsSync;
 var write = fs.writeFileSync;
 var Promise = require('bluebird');
+var semver = require('semver');
 
 exports.register = function(commander) {
 
@@ -186,24 +187,41 @@ exports.register = function(commander) {
                         })
 
                         .then(function(components) {
+                            var finalList = [];
+                            var posMap = {};
 
-                            // 过滤掉本地的仓库。已经同名的包。
-                            components = components
+                            components.forEach(function(item) {
+                              if (typeof posMap[item.name] !== 'undefined') {
+                                var target = finalList[posMap[item.name]];
+                                var finalItem = target;
 
-                                .filter(function(item) {
-                                    return item.location !== 'local';
-                                })
+                                // 版本一致直接跳过。
+                                if (target.version === item.version) {
+                                  return;
+                                }
 
-                                // 先不 sort 了，通过先后顺序来准定用哪个版本吧。
-                                // 而不是总是用最新版本。
-                                // .sort(function(a, b) {
-                                //     return _.compareVersion(a.version, b.version);
-                                // })
+                                // 选择最新版本。
+                                if (semver.gt(item.version, target.version)) {
+                                  finalItem = item;
+                                  finalList.splice(posMap[item.name], 1, item);
+                                }
 
-                                // 过滤同名的组件名。
-                                .filter(function(item, index, list) {
-                                    return _.indexOfArray('name', item.name, list) === index;
-                                });
+                                fis.log.warning(item.name + '@' + item.version + ' conflict againest with ' + target.name + '@' + target.version + ', version ' + finalItem.name + '@' + finalItem.version + ' will be used!');
+
+                              } else {
+                                posMap[item.name] = finalList.length;
+                                finalList.push(item);
+                              }
+                            });
+
+                            // console.log(finalList.map(function(item) {
+                            //   return item.name + '@' + item.version
+                            // }));
+
+                            // 过滤掉本地的。
+                            components = finalList.filter(function(item) {
+                              return item.location !== 'local';
+                            });
 
                             if (!components.length) {
                                 console.log('Already installed');
