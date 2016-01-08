@@ -310,6 +310,7 @@ exports.register = function(commander) {
                     if (/Not\s+Found/i.test(e.message)) {
                         logger.warn('`fis install` now is for installing commponents, you may use `\x1b[31mlights install\x1b[0m` instead.');
                     }
+                    fis.log.throw = false;
                     logger.error('\x1b[31m%s\x1b[0m', e.message);
                 });
         });
