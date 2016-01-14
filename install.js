@@ -25,13 +25,14 @@ exports.register = function(commander) {
     .option('--save', 'save component(s) dependencies into `component.json` file.')
     .option('-r, --root <path>', 'set project root')
     .option('--verbose', 'enable verbose mode')
+    .option('--download-gitlab-from-svn', 'you don\'t need this.')
     .action(function() {
       var args = [].slice.call(arguments);
       var options = args.pop();
-
       var settings = {
         save: !!options.save,
         root: options.root || '',
+        downloadGitlabFromSvn: options.downloadGitlabFromSvn,
         components: args.concat()
       };
 
@@ -60,6 +61,9 @@ exports.register = function(commander) {
           })
 
           .then(function(dir) {
+            if (dir && dir !== process.cwd()) {
+              fis.log.notice('Detect `fis-conf.js` is under `' + dir.green + '`. \nComponents will be installed under the folder too.');
+            }
             settings.root = dir || process.cwd();
           });
         }
@@ -161,7 +165,7 @@ exports.register = function(commander) {
 
         // validate and filter invalid dependencies.
         // 过滤掉不能识别的依赖。
-        return strToRemote(components);
+        return strToRemote(components, false, settings);
       })
 
       // finally get components list.
@@ -281,13 +285,18 @@ exports.register = function(commander) {
 
               .install(progress)
 
-            .then(function(component) {
-              if (bar instanceof SimpleTick) {
-                bar.clear();
-              }
-              collection.push(component);
-              return collection;
-            })
+              .then(function(component) {
+                if (bar instanceof SimpleTick) {
+                  bar.clear();
+                }
+                collection.push(component);
+                return collection;
+              })
+
+              // .catch(function(e) {
+              //   logger.error('\x1b[31m%s\x1b[0m', e.message);
+              //   fis.log.debug(e.stack);
+              // });
           }, [])
 
           .then(function(components) {
@@ -312,7 +321,7 @@ exports.register = function(commander) {
 
           config.dependencies = config.dependencies || [];
 
-          var oldList = strToRemote(config.dependencies);
+          var oldList = strToRemote(config.dependencies, false, settings);
           specified.forEach(function(item) {
             var idx;
 
@@ -335,13 +344,13 @@ exports.register = function(commander) {
           logger.warn('`fis install` now is for installing commponents, you may use `\x1b[31mlights install\x1b[0m` instead.');
         }
 
-        options.verbose || (fis.log.throw = false);
         logger.error('\x1b[31m%s\x1b[0m', e.message);
+        fis.log.debug(e.stack);
       });
     });
 };
 
-function strToRemote(components, ignoreInvalid) {
+function strToRemote(components, ignoreInvalid, settings) {
   return components
 
     .map(function(component) {
@@ -352,7 +361,9 @@ function strToRemote(components, ignoreInvalid) {
         return null;
       }
 
-      return factory(component);
+      return factory(component, null, {
+        downloadGitlabFromSvn: settings.downloadGitlabFromSvn
+      });
     })
     .filter(function(item) {
       return item != null;

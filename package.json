@@ -1,7 +1,7 @@
 {
   "name": "fis-command-install",
   "description": "fis install command.",
-  "version": "0.2.11",
+  "version": "0.2.12",
   "author": "FIS Team <fis@baidu.com>",
   "homepage": "http://fis.baidu.com/",
   "keywords": [
@@ -24,7 +24,8 @@
     "fis-scaffold-kernel": "~0.1.0",
     "progress": "^1.1.8",
     "request": "^2.48.0",
-    "semver": "^4.1.0"
+    "semver": "^4.1.0",
+    "tar": "^2.2.1"
   },
   "devDependencies": {}
 }
