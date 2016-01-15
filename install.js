@@ -175,20 +175,17 @@ exports.register = function(commander) {
           return;
         }
 
+        var collector = require('./lib/collector.js');
+        var SimpleTick = require('./lib/tick.js');
+        var bar = new SimpleTick('analyzing dependencies ', {
+          keepAlive: true
+        });
 
-        return Promise.try(function() {
-          var collector = require('./lib/collector.js');
-          var SimpleTick = require('./lib/tick.js');
-          var bar = new SimpleTick('analyzing dependencies ', {
-            keepAlive: true
-          });
-
-          return collector(components)
-
-          .then(function(components) {
-            bar.clear();
-            return components;
-          });
+        return collector(components)
+        .then(function(components) {
+          bar.clear();
+          bar = null;
+          return components;
         })
 
         .then(function(components) {
@@ -309,6 +306,14 @@ exports.register = function(commander) {
             console.log('Installed\n%s', arrs.join('\n'));
             return components;
           });
+        })
+
+        .catch(function(e) {
+          bar && bar.clear;
+          console.log('\x1b[31m%s\x1b[0m', e.message);
+          logger.debug(e.stack);
+
+          process.exit(1);
         });
       })
 
@@ -344,8 +349,8 @@ exports.register = function(commander) {
           logger.warn('`fis install` now is for installing commponents, you may use `\x1b[31mlights install\x1b[0m` instead.');
         }
 
-        logger.error('\x1b[31m%s\x1b[0m', e.message);
-        fis.log.debug(e.stack);
+        console.log('\x1b[31m%s\x1b[0m', e.message);
+        logger.debug(e.stack);
       });
     });
 };
