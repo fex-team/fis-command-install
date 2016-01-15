@@ -322,7 +322,7 @@ exports.register = function(commander) {
         // 如果指定了  --save， 则需要把数据写入到 components.josn 文件里面。
         if (settings.save && args.length && installed && installed.length) {
           var config = settings.config || {};
-          var specified = strToRemote(args.concat());
+          var specified = strToRemote(args.concat(), false, settings);
 
           config.dependencies = config.dependencies || [];
 
