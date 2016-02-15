@@ -189,9 +189,12 @@ exports.register = function(commander) {
         })
 
         .then(function(components) {
+          // console.log(components);
+
           var finalList = [];
           var posMap = {};
           var specified = {};
+          var alerted = {};
 
           settings.components.forEach(function(item) {
             var parts = item.split('@');
@@ -211,28 +214,30 @@ exports.register = function(commander) {
               }
 
               // 原有版本不符合制定版本要求，而先版本符合，那就直接替换吧。
-              if (specified[item.name] && !semver.satisfies(target.version, specified[item.name]) && semver.satisfies(item.version, specified[item.name])) {
+              if (specified[item.name] && !satisfies(target.version, specified[item.name]) && satisfies(item.version, specified[item.name])) {
                 finalItem = item;
                 finalList.splice(posMap[item.name], 1, item);
                 return;
               }
 
               // 现有版本不符合制定要求，那还是不要换了。
-              if (specified[item.name] && !semver.satisfies(item.version, specified[item.name])) {
-                !notified[item.name + '@' + item.version] && fis.log.warning(item.name + '@' + item.version + ' don\' satisfy the version ' + item.name + '@' + specified[item.name] + ' you specified. The version ' + finalItem.name + '@' + finalItem.version + ' will be keeped!');
+              if (specified[item.name] && !satisfies(item.version, specified[item.name])) {
+                !notified[item.name + '@' + item.version] && fis.log.warning(item.name + '@' + item.version + ' don\'t satisfy the version ' + item.name + '@' + specified[item.name] + ' you specified. The version ' + finalItem.name + '@' + finalItem.version + ' will be keeped!');
                 notified[item.name + '@' + item.version] = true;
                 return;
               }
 
               // 用户没有指定要什么版本，那就用最新的版本
               // 不满足需求，那就在入口指定版本吧。
-              if (semver.gt(item.version, target.version)) {
+              if (semver.valid(item.version) && semver.validRange(target.version) && semver.gt(item.version, target.version)) {
                 finalItem = item;
                 finalList.splice(posMap[item.name], 1, item);
               }
 
-              fis.log.warning(item.name + '@' + item.version + ' conflict againest with ' + target.name + '@' + target.version + ', version ' + finalItem.name + '@' + finalItem.version + ' will be used!');
-
+              if (!alerted[item.name + '@' + item.version]) {
+                fis.log.warning(item.name + '@' + item.version + ' conflict againest with ' + target.name + '@' + target.version + ', version ' + finalItem.name + '@' + finalItem.version + ' will be used!');
+                alerted[item.name + '@' + item.version] = true;
+              }
             } else {
               posMap[item.name] = finalList.length;
               finalList.push(item);
@@ -303,7 +308,7 @@ exports.register = function(commander) {
               return (index === last ? '└── ' : '├── ') + item.type + ':' + item.address + '@' + item.version;
             });
 
-            console.log('Installed\n%s', arrs.join('\n'));
+            console.log('\nInstalled\n%s', arrs.join('\n'));
             return components;
           });
         })
@@ -373,4 +378,12 @@ function strToRemote(components, ignoreInvalid, settings) {
     .filter(function(item) {
       return item != null;
     });
+}
+
+function satisfies(version, range) {
+  if (range === '*') {
+    return true;
+  }
+
+  return semver.valid(version) && semver.validRange(range) && semver.satisfies(version, range);
 }
