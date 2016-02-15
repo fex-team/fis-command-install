@@ -180,6 +180,10 @@ exports.register = function(commander) {
         var bar = new SimpleTick('analyzing dependencies ', {
           keepAlive: true
         });
+        var specified = {};
+        components.forEach(function(item) {
+          specified[item.name] = item._version;
+        });
 
         return collector(components)
         .then(function(components) {
@@ -193,14 +197,7 @@ exports.register = function(commander) {
 
           var finalList = [];
           var posMap = {};
-          var specified = {};
           var alerted = {};
-
-          settings.components.forEach(function(item) {
-            var parts = item.split('@');
-            specified[parts[0]] = parts[1] || '*';
-          });
-
           var notified = {};
 
           components.forEach(function(item) {
